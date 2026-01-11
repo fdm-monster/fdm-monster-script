@@ -25,7 +25,7 @@ cat<<-EOH
    name      -> the name for the docker bridge
    interface -> the host interface the bridge will bind to (ex eth0)
    network   -> the network address in cidr notation (ex 192.168.1.0/24)
-   aubnet    -> the aubnet in cidr available for the bridge (ex 192.168.1.240/28)
+   subnet    -> the subnet (cidr notation) available for the bridge (ex 192.168.1.240/28)
                 These are the IP addresses docker will asign to containers IF
                 the container is not assigned a static IP at start. These IP
                 address must be excluded from any DHCP scopes
