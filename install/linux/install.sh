@@ -8,7 +8,7 @@ set -e
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 
 # Configuration
-CLI_VERSION="1.0.5"
+CLI_VERSION="1.0.6"
 NODE_VERSION="24.12.0"
 NPM_PACKAGE="@fdm-monster/server"
 INSTALL_DIR="$HOME/.fdm-monster"
@@ -149,9 +149,6 @@ EOF
     # Install the package
     YARN_NODE_LINKER=node-modules yarn add "$NPM_PACKAGE"
 
-    # Get and display installed version
-    local INSTALLED_VERSION=$(node -p "require('./node_modules/$NPM_PACKAGE/package.json').version" 2>/dev/null || echo "unknown")
-
     # Create .env file in data dir with environment variables
     local ENV_FILE="$DATA_DIR/.env"
     if [[ ! -f "$ENV_FILE" ]]; then
@@ -164,7 +161,7 @@ EOF
         print_success ".env file created at $DATA_DIR/.env"
     fi
 
-    print_success "$NPM_PACKAGE $INSTALLED_VERSION installed"
+    print_success "$NPM_PACKAGE installed"
     return 0
 }
 
@@ -494,9 +491,12 @@ get_network_addresses() {
 }
 
 print_instructions() {
+    # Get installed version
+    local INSTALLED_VERSION=$(cd "$INSTALL_DIR" && node -p "require('./node_modules/$NPM_PACKAGE/package.json').version" 2>/dev/null || echo "unknown")
+
     echo ""
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${GREEN}  Installation Complete!${NC}"
+    echo -e "${GREEN}  FDM Monster v$INSTALLED_VERSION is ready!${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo -e "  ${BLUE}Access FDM Monster at:${NC}"
