@@ -1,6 +1,6 @@
 #!/bin/bash
 # FDM Monster One-Click Installer for Linux
-# Usage: curl -fsSL https://raw.githubusercontent.com/fdm-monster/fdm-monster-scripts/main/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/fdm-monster/fdm-monster-scripts/main/install/linux/install.sh | bash
 
 set -e
 
@@ -15,7 +15,7 @@ NPM_PACKAGE="@fdm-monster/server"
 INSTALL_DIR="$HOME/.fdm-monster"
 DATA_DIR="$HOME/.fdm-monster-data"
 DEFAULT_PORT=4000
-INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/fdm-monster-scripts/fdm-monster/main/install.sh"
+INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/fdm-monster/fdm-monster-scripts/main/install/linux/install.sh"
 
 # Helper functions
 print_banner() {
@@ -320,9 +320,15 @@ create_cli_wrapper() {
     local BIN_DIR="$HOME/.local/bin"
     mkdir -p "$BIN_DIR"
 
-    cp "$0" "$BIN_DIR/fdm-monster" 2>/dev/null || curl -fsSL "$INSTALL_SCRIPT_URL" -o "$BIN_DIR/fdm-monster"
-    chmod +x "$BIN_DIR/fdm-monster"
+    # Try to copy the script, or download it if running from pipe
+    if ! cp "$0" "$BIN_DIR/fdm-monster" 2>/dev/null; then
+        if ! curl -fsSL "$INSTALL_SCRIPT_URL" -o "$BIN_DIR/fdm-monster"; then
+            print_error "Failed to create CLI wrapper - could not download from $INSTALL_SCRIPT_URL"
+            exit 1
+        fi
+    fi
 
+    chmod +x "$BIN_DIR/fdm-monster"
     ln -sf "$BIN_DIR/fdm-monster" "$BIN_DIR/fdmm"
 
     if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
@@ -463,24 +469,22 @@ handle_command() {
             local BIN_DIR="$HOME/.local/bin"
             local TEMP_FILE="/tmp/fdm-monster-cli-update.sh"
 
-            curl -fsSL "$UPDATE_URL" -o "$TEMP_FILE"
-
-            if [[ $? -eq 0 ]]; then
-                # Extract new version from downloaded script
-                local NEW_VERSION=$(grep '^CLI_VERSION=' "$TEMP_FILE" | cut -d'"' -f2)
-
-                mv "$TEMP_FILE" "$BIN_DIR/fdm-monster"
-                chmod +x "$BIN_DIR/fdm-monster"
-                ln -sf "$BIN_DIR/fdm-monster" "$BIN_DIR/fdmm"
-
-                if [[ -n "$NEW_VERSION" ]]; then
-                    print_success "CLI updated successfully to v$NEW_VERSION"
-                else
-                    print_success "CLI updated successfully"
-                fi
-            else
-                print_error "Failed to download CLI update"
+            if ! curl -fsSL "$UPDATE_URL" -o "$TEMP_FILE"; then
+                print_error "Failed to download CLI update from $UPDATE_URL"
                 exit 1
+            fi
+
+            # Extract new version from downloaded script
+            local NEW_VERSION=$(grep '^CLI_VERSION=' "$TEMP_FILE" | cut -d'"' -f2)
+
+            mv "$TEMP_FILE" "$BIN_DIR/fdm-monster"
+            chmod +x "$BIN_DIR/fdm-monster"
+            ln -sf "$BIN_DIR/fdm-monster" "$BIN_DIR/fdmm"
+
+            if [[ -n "$NEW_VERSION" ]]; then
+                print_success "CLI updated successfully to v$NEW_VERSION"
+            else
+                print_success "CLI updated successfully"
             fi
             ;;
         version|--version|-v)
