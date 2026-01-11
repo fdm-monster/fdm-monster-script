@@ -8,7 +8,8 @@ set -e
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 
 # Configuration
-CLI_VERSION="1.0.6"
+CLI_VERSION="1.0.7"
+NODE_MAJOR=24
 NODE_VERSION="24.12.0"
 NPM_PACKAGE="@fdm-monster/server"
 INSTALL_DIR="$HOME/.fdm-monster"
@@ -158,11 +159,11 @@ install_nodejs() {
 ensure_nodejs() {
     if command -v node &> /dev/null; then
         local CURRENT_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
-        if [[ "$CURRENT_VERSION" -ge 22 ]]; then
+        if [[ "$CURRENT_VERSION" -ge "$NODE_MAJOR" ]]; then
             print_success "Node.js $(node -v) detected"
             return 0
         fi
-        print_warning "Node.js $CURRENT_VERSION too old, installing Node.js 24..."
+        print_warning "Node.js $CURRENT_VERSION too old, installing Node.js $NODE_MAJOR..."
     fi
 
     install_nodejs
