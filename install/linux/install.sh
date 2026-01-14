@@ -33,7 +33,7 @@ readonly YELLOW='\033[1;33m'
 readonly BLUE='\033[0;34m'
 readonly NC='\033[0m'
 
-readonly CLI_VERSION="1.0.13"
+readonly CLI_VERSION="1.0.14"
 
 # Configuration (see ENVIRONMENT VARIABLE OVERRIDES section above)
 USER_HOME="${FDMM_HOME:-$HOME}"
@@ -111,7 +111,6 @@ validate_semver() {
 
 version_gt() {
     [[ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" != "$1" ]]
-    return 0
 }
 
 check_dependencies() {
@@ -489,6 +488,7 @@ handle_command() {
 
             # Ensure Node.js and Yarn are available
             print_info "Checking FDM Monster requirements..."
+            detect_platform
             ensure_nodejs
             setup_yarn
 
